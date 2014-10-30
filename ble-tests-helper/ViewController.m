@@ -27,6 +27,9 @@
 	// Do any additional setup after loading the view, typically from a nib.
     _peripheralManager = [[CBPeripheralManager alloc] initWithDelegate:self queue:nil];
     _adUuids = [NSMutableArray array];
+    
+    // Make app not sleep
+    [[UIApplication sharedApplication] setIdleTimerDisabled:YES];
 }
 
 - (void)didReceiveMemoryWarning
