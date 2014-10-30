@@ -22,6 +22,7 @@
 		CE3AC3B31A02B7FA00D350E1 /* UIKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = CE3AC3921A02B7FA00D350E1 /* UIKit.framework */; };
 		CE3AC3BB1A02B7FA00D350E1 /* InfoPlist.strings in Resources */ = {isa = PBXBuildFile; fileRef = CE3AC3B91A02B7FA00D350E1 /* InfoPlist.strings */; };
 		CE3AC3BD1A02B7FA00D350E1 /* ble_tests_helperTests.m in Sources */ = {isa = PBXBuildFile; fileRef = CE3AC3BC1A02B7FA00D350E1 /* ble_tests_helperTests.m */; };
+		CE3AC3C71A02B83B00D350E1 /* CoreBluetooth.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = CE3AC3C61A02B83B00D350E1 /* CoreBluetooth.framework */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -55,6 +56,7 @@
 		CE3AC3B81A02B7FA00D350E1 /* ble-tests-helperTests-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = "ble-tests-helperTests-Info.plist"; sourceTree = "<group>"; };
 		CE3AC3BA1A02B7FA00D350E1 /* en */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = en; path = en.lproj/InfoPlist.strings; sourceTree = "<group>"; };
 		CE3AC3BC1A02B7FA00D350E1 /* ble_tests_helperTests.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = ble_tests_helperTests.m; sourceTree = "<group>"; };
+		CE3AC3C61A02B83B00D350E1 /* CoreBluetooth.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreBluetooth.framework; path = System/Library/Frameworks/CoreBluetooth.framework; sourceTree = SDKROOT; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -62,6 +64,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				CE3AC3C71A02B83B00D350E1 /* CoreBluetooth.framework in Frameworks */,
 				CE3AC3911A02B7FA00D350E1 /* CoreGraphics.framework in Frameworks */,
 				CE3AC3931A02B7FA00D350E1 /* UIKit.framework in Frameworks */,
 				CE3AC38F1A02B7FA00D350E1 /* Foundation.framework in Frameworks */,
@@ -103,6 +106,7 @@
 		CE3AC38D1A02B7FA00D350E1 /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
+				CE3AC3C61A02B83B00D350E1 /* CoreBluetooth.framework */,
 				CE3AC38E1A02B7FA00D350E1 /* Foundation.framework */,
 				CE3AC3901A02B7FA00D350E1 /* CoreGraphics.framework */,
 				CE3AC3921A02B7FA00D350E1 /* UIKit.framework */,
@@ -328,6 +332,7 @@
 				CLANG_WARN_INT_CONVERSION = YES;
 				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
 				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				CODE_SIGN_IDENTITY = "iPhone Developer: Google Development (3F4Y5873JF)";
 				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
 				COPY_PHASE_STRIP = NO;
 				GCC_C_LANGUAGE_STANDARD = gnu99;
@@ -367,6 +372,7 @@
 				CLANG_WARN_INT_CONVERSION = YES;
 				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
 				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				CODE_SIGN_IDENTITY = "iPhone Developer: Google Development (3F4Y5873JF)";
 				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
 				COPY_PHASE_STRIP = YES;
 				ENABLE_NS_ASSERTIONS = NO;
@@ -392,6 +398,7 @@
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
 				GCC_PREFIX_HEADER = "ble-tests-helper/ble-tests-helper-Prefix.pch";
 				INFOPLIST_FILE = "ble-tests-helper/ble-tests-helper-Info.plist";
+				IPHONEOS_DEPLOYMENT_TARGET = 7.0;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				WRAPPER_EXTENSION = app;
 			};
@@ -405,6 +412,7 @@
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
 				GCC_PREFIX_HEADER = "ble-tests-helper/ble-tests-helper-Prefix.pch";
 				INFOPLIST_FILE = "ble-tests-helper/ble-tests-helper-Info.plist";
+				IPHONEOS_DEPLOYMENT_TARGET = 7.0;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				WRAPPER_EXTENSION = app;
 			};
@@ -469,6 +477,7 @@
 				CE3AC3C21A02B7FA00D350E1 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
 		};
 		CE3AC3C31A02B7FA00D350E1 /* Build configuration list for PBXNativeTarget "ble-tests-helperTests" */ = {
 			isa = XCConfigurationList;
@@ -477,6 +486,7 @@
 				CE3AC3C51A02B7FA00D350E1 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
 	};
