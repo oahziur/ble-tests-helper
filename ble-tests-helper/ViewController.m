@@ -17,6 +17,8 @@
 // Hear rate service
 @property (strong, nonatomic) CBMutableCharacteristic   *heartRateSensorHeartRateCharacteristic;
 @property (strong, nonatomic) CBMutableCharacteristic   *heartRateSensorLocationCharacteristic;
+@property (strong, nonatomic) NSTimer                   *heartRateUpdateTimer;
+
 @end
 
 @implementation ViewController
@@ -38,6 +40,13 @@
     // Dispose of any resources that can be recreated.
 }
 
+- (void)updateHeartRate
+{
+    short heartRate = arc4random() % 20 + 60;
+    char heartRateData[2]; heartRateData[0] = 0; heartRateData[1] = heartRate;
+    [self.peripheralManager updateValue:[NSData dataWithBytes:&heartRateData length:2] forCharacteristic:self.heartRateSensorHeartRateCharacteristic onSubscribedCentrals:nil];
+}
+
 - (void)addHeartRateService:(CBPeripheralManager*)peripheralManager
 {
     // Define the heart rate service
@@ -51,7 +60,6 @@
                                                                       properties:CBCharacteristicPropertyRead
                                                                       value:[NSData dataWithBytes:&sensorLocation length:1]
                                                                       permissions:CBAttributePermissionsReadable];
-    
   
     // Define the heart rate reading characteristic
     self.heartRateSensorHeartRateCharacteristic = [[CBMutableCharacteristic alloc]
@@ -59,6 +67,8 @@
                                                    properties: CBCharacteristicPropertyNotify
                                                    value:nil
                                                    permissions:CBAttributePermissionsReadable];
+  
+    self.heartRateUpdateTimer = [NSTimer scheduledTimerWithTimeInterval:1.0f target:self selector:@selector(updateHeartRate) userInfo:nil repeats:YES];
     
     // Add the characteristics to the service
     heartRateService.characteristics = 
@@ -165,8 +175,6 @@
 - (void)peripheralManager:(CBPeripheralManager *)peripheral central:(CBCentral *)central didSubscribeToCharacteristic:(CBCharacteristic *)characteristic
 {
     NSLog(@"peripheralManager:central:didSubscribeToCharacteristic: peripheral:%@ central:%@ characteristic:%@", peripheral, central, characteristic);
-    char heartRateData[2]; heartRateData[0] = 0; heartRateData[1] = 60;
-    [peripheral updateValue:[NSData dataWithBytes:&heartRateData length:2] forCharacteristic:self.heartRateSensorHeartRateCharacteristic onSubscribedCentrals:nil];
 }
 
 /*!
