@@ -1,0 +1,12 @@
+** Services
+*** Heart Rate Sensor
+    1. download test central app:
+      https://github.com/GoogleChrome/chrome-app-samples/tree/master/samples/bluetooth-samples/heart-rate-sensor
+    2. change serviceId in main.js (only if run on iOS)
+       #+BEGIN_SRC text
+           var HEART_RATE_SERVICE_UUID       = '180d';
+           var HEART_RATE_MEASUREMENT_UUID   = '2a37';
+           var BODY_SENSOR_LOCATION_UUID     = '2a38';
+           var HEART_RATE_CONTROL_POINT_UUID = '2a39';
+       #+END_SRC
+    3. build & run central app and this on separate devices (iPhone4S+, iPad3+, ChromeOS)
