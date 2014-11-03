@@ -57,11 +57,9 @@
 
 - (void)updateHeartRate
 {
-    [self logString:@"start updating heart rate notify value"];
     short heartRate = arc4random() % 20 + 60;
     char heartRateData[2]; heartRateData[0] = 0; heartRateData[1] = heartRate;
     [self.peripheralManager updateValue:[NSData dataWithBytes:&heartRateData length:2] forCharacteristic:self.heartRateSensorHeartRateCharacteristic onSubscribedCentrals:nil];
-    [self logString:@"finish updating heart rate notify value"];
 }
 
 - (void)addHeartRateService:(CBPeripheralManager*)peripheralManager
@@ -87,10 +85,8 @@
 
 - (void)updateTestCharacteristic
 {
-    [self logString:@"start updating test notify value"];
     char val = arc4random();
     [self.peripheralManager updateValue:[NSData dataWithBytes:&val length:1] forCharacteristic:self.testNotifyCharacteristic onSubscribedCentrals:nil];
-    [self logString:@"finish updating test notify value"];
 }
 
 - (void)addTestService:(CBPeripheralManager*)peripheralManager
