@@ -11,13 +11,17 @@
 
 @interface ViewController () <CBPeripheralManagerDelegate>
 
-@property (strong, nonatomic) CBPeripheralManager       *peripheralManager;
-@property (strong, nonatomic) NSMutableArray            *adUuids;
+@property (strong, nonatomic) CBPeripheralManager*      peripheralManager;
+@property (strong, nonatomic) NSMutableArray*           adUuids;
 
 // Hear rate service
-@property (strong, nonatomic) CBMutableCharacteristic   *heartRateSensorHeartRateCharacteristic;
-@property (strong, nonatomic) CBMutableCharacteristic   *heartRateSensorLocationCharacteristic;
-@property (strong, nonatomic) NSTimer                   *heartRateUpdateTimer;
+@property (strong, nonatomic) CBMutableCharacteristic*  heartRateSensorHeartRateCharacteristic;
+@property (strong, nonatomic) NSTimer*                  heartRateUpdateTimer;
+
+@property (strong, nonatomic) CBMutableCharacteristic*  testNotifyCharacteristic;
+@property (strong, nonatomic) NSTimer*                  testUpdateTimer;
+
+@property (strong, nonatomic) UITextView*               logTextView;
 
 @end
 
@@ -34,6 +38,17 @@
     [[UIApplication sharedApplication] setIdleTimerDisabled:YES];
 }
 
+- (void)viewWillAppear:(BOOL)animated
+{
+    [super viewWillAppear:animated];
+    
+    self.logTextView = [[UITextView alloc] initWithFrame:self.view.bounds];
+    [self.view addSubview:self.logTextView];
+    self.logTextView.scrollEnabled = YES;
+    self.logTextView.editable = NO;
+    
+}
+
 - (void)didReceiveMemoryWarning
 {
     [super didReceiveMemoryWarning];
@@ -42,204 +57,167 @@
 
 - (void)updateHeartRate
 {
+    [self logString:@"start updating heart rate notify value"];
     short heartRate = arc4random() % 20 + 60;
     char heartRateData[2]; heartRateData[0] = 0; heartRateData[1] = heartRate;
     [self.peripheralManager updateValue:[NSData dataWithBytes:&heartRateData length:2] forCharacteristic:self.heartRateSensorHeartRateCharacteristic onSubscribedCentrals:nil];
+    [self logString:@"finish updating heart rate notify value"];
 }
 
 - (void)addHeartRateService:(CBPeripheralManager*)peripheralManager
 {
-    // Define the heart rate service
-    CBMutableService *heartRateService = [[CBMutableService alloc]
-                                          initWithType:[CBUUID UUIDWithString:@"180D"] primary:true];
+    CBMutableService* heartRateService = [[CBMutableService alloc]
+                                          initWithType:[CBUUID UUIDWithString:@"180D"] primary:YES];
     
     // Define the sensor location characteristic
     char sensorLocation = 5;
-    self.heartRateSensorLocationCharacteristic = [[CBMutableCharacteristic alloc]
-                                                                      initWithType:[CBUUID UUIDWithString:@"0x2A38"]
-                                                                      properties:CBCharacteristicPropertyRead
-                                                                      value:[NSData dataWithBytes:&sensorLocation length:1]
-                                                                      permissions:CBAttributePermissionsReadable];
+    CBMutableCharacteristic* heartRateSensorLocationCharacteristic = [[CBMutableCharacteristic alloc] initWithType:[CBUUID UUIDWithString:@"2A38"] properties:CBCharacteristicPropertyRead value:[NSData dataWithBytes:&sensorLocation length:1] permissions:CBAttributePermissionsReadable];
   
     // Define the heart rate reading characteristic
-    self.heartRateSensorHeartRateCharacteristic = [[CBMutableCharacteristic alloc]
-                                                   initWithType:[CBUUID UUIDWithString:@"2A37"]
-                                                   properties: CBCharacteristicPropertyNotify
-                                                   value:nil
-                                                   permissions:CBAttributePermissionsReadable];
+    self.heartRateSensorHeartRateCharacteristic = [[CBMutableCharacteristic alloc] initWithType:[CBUUID UUIDWithString:@"2A37"] properties: CBCharacteristicPropertyNotify value:nil permissions:CBAttributePermissionsReadable];
   
     self.heartRateUpdateTimer = [NSTimer scheduledTimerWithTimeInterval:1.0f target:self selector:@selector(updateHeartRate) userInfo:nil repeats:YES];
     
-    // Add the characteristics to the service
-    heartRateService.characteristics = 
-    @[self.heartRateSensorLocationCharacteristic, self.heartRateSensorHeartRateCharacteristic];
+    heartRateService.characteristics = @[heartRateSensorLocationCharacteristic, self.heartRateSensorHeartRateCharacteristic];
     
-    // Add the service to the peripheral manager    
     [peripheralManager addService:heartRateService];
     
     [self.adUuids addObject:[CBUUID UUIDWithString:@"180D"]];
 }
 
+- (void)updateTestCharacteristic
+{
+    [self logString:@"start updating test notify value"];
+    char val = arc4random();
+    [self.peripheralManager updateValue:[NSData dataWithBytes:&val length:1] forCharacteristic:self.testNotifyCharacteristic onSubscribedCentrals:nil];
+    [self logString:@"finish updating test notify value"];
+}
+
+- (void)addTestService:(CBPeripheralManager*)peripheralManager
+{
+    
+    CBMutableService* includedTestService = [[CBMutableService alloc] initWithType:[CBUUID UUIDWithString:@"C9D4"] primary:NO];
+    [peripheralManager addService:includedTestService];
+    
+    CBMutableService* testService = [[CBMutableService alloc] initWithType:[CBUUID UUIDWithString:@"C9D3"] primary:YES];
+    // included service must be published before referenced service
+    testService.includedServices = @[includedTestService];
+    
+    self.testNotifyCharacteristic = [[CBMutableCharacteristic alloc] initWithType:[CBUUID UUIDWithString:@"C9D5"] properties: CBCharacteristicPropertyNotify value:nil permissions:CBAttributePermissionsReadable];
+    
+    self.testUpdateTimer = [NSTimer scheduledTimerWithTimeInterval:3.0f target:self selector:@selector(updateTestCharacteristic) userInfo:nil repeats:YES];
+   
+    char testByte = 100;
+    
+    CBMutableCharacteristic* testReadCharacteristic = [[CBMutableCharacteristic alloc] initWithType:[CBUUID UUIDWithString:@"C9D6"] properties:CBCharacteristicPropertyRead value:[NSData dataWithBytes:&testByte length:1] permissions:CBAttributePermissionsReadable];
+    
+    CBMutableCharacteristic* testWriteCharacteristic = [[CBMutableCharacteristic alloc] initWithType:[CBUUID UUIDWithString:@"C9D7"] properties:CBCharacteristicPropertyWrite value:nil permissions:CBAttributePermissionsWriteable];
+    
+    CBMutableCharacteristic* descriptorsCharacteristic = [[CBMutableCharacteristic alloc] initWithType:[CBUUID UUIDWithString:@"C9D8"] properties:CBCharacteristicPropertyWrite | CBCharacteristicPropertyRead value:nil permissions:CBAttributePermissionsWriteable | CBAttributePermissionsReadable];
+    
+    // Only the Characteristic User Description and Characteristic Presentation Format descriptors are currently supported.
+    CBUUID* userDescriptionUuid = [CBUUID UUIDWithString:CBUUIDCharacteristicUserDescriptionString];
+    CBMutableDescriptor* testDescriptor =[[CBMutableDescriptor alloc] initWithType:userDescriptionUuid value:@"user description value"];
+    
+    // TODO: For some reason: adding service with this descriptor will power off bluetooth on iOS device.
+    // CBUUID* presentationFormatUuid = [CBUUID UUIDWithString:CBUUIDCharacteristicFormatString];
+    // CBMutableDescriptor* testPresentationDescriptor = [[CBMutableDescriptor alloc] initWithType:presentationFormatUuid value:[NSData dataWithBytes:&testByte length:1]];
+    
+    descriptorsCharacteristic.descriptors = @[testDescriptor];
+    
+    testService.characteristics = @[testReadCharacteristic, testWriteCharacteristic, descriptorsCharacteristic]; //descriptorsCharacteristic];
+    
+    [peripheralManager addService:testService];
+    [self.adUuids addObject:[CBUUID UUIDWithString:@"C9D3"]];
+}
+
+- (void)logString:(NSString*)format, ...
+{
+    va_list va;
+    va_start(va, format);
+    self.logTextView.text = [[self.logTextView.text stringByAppendingString:@"\n"] stringByAppendingString:[[NSString alloc] initWithFormat:format arguments:va]];
+    va_end(va);
+}
 
 #pragma mark CBPeripheralManagerDelegate methods
 
-
-/*!
- *  @method peripheralManagerDidUpdateState:
- *
- *  @param peripheral   The peripheral manager whose state has changed.
- *
- *  @discussion         Invoked whenever the peripheral manager's state has been updated. Commands should only be issued when the state is
- *                      <code>CBPeripheralManagerStatePoweredOn</code>. A state below <code>CBPeripheralManagerStatePoweredOn</code>
- *                      implies that advertisement has paused and any connected centrals have been disconnected. If the state moves below
- *                      <code>CBPeripheralManagerStatePoweredOff</code>, advertisement is stopped and must be explicitly restarted, and the
- *                      local database is cleared and all services must be re-added.
- *
- *  @see                state
- *
- */
 - (void)peripheralManagerDidUpdateState:(CBPeripheralManager *)peripheral
 {
-    NSLog(@"peripheralManagerDidUpdateState: %@", peripheral);
+    [self logString:@"peripheralManagerDidUpdateState: %@", peripheral];
+    
     if (peripheral.state != CBPeripheralManagerStatePoweredOn) {
+        [peripheral removeAllServices];
+        [peripheral stopAdvertising];
+        [self.testUpdateTimer invalidate];
+        [self.heartRateUpdateTimer invalidate];
+        [self.adUuids removeAllObjects];
         return;
     }
-    [self  addHeartRateService:peripheral];
+    
+    [self logString:@"peripheral state is on"];
+    
+    [self addHeartRateService:peripheral];
+    [self addTestService:peripheral];
+    
     NSDictionary *data = @{CBAdvertisementDataLocalNameKey: @"BLE-tests-helper",
                            CBAdvertisementDataServiceUUIDsKey: [self.adUuids copy]};
     [peripheral startAdvertising:data];
 }
 
-
-/*!
- *  @method peripheralManager:willRestoreState:
- *
- *  @param peripheral	The peripheral manager providing this information.
- *  @param dict			A dictionary containing information about <i>peripheral</i> that was preserved by the system at the time the app was terminated.
- *
- *  @discussion			For apps that opt-in to state preservation and restoration, this is the first method invoked when your app is relaunched into
- *						the background to complete some Bluetooth-related task. Use this method to synchronize your app's state with the state of the
- *						Bluetooth system.
- *
- *  @seealso            CBPeripheralManagerRestoredStateServicesKey;
- *  @seealso            CBPeripheralManagerRestoredStateAdvertisementDataKey;
- *
- */
 - (void)peripheralManager:(CBPeripheralManager *)peripheral willRestoreState:(NSDictionary *)dict
 {
-    NSLog(@"peripheralManager:willRestoreState: peripheral:%@ dict: %@", peripheral, dict);
+    [self logString:@"peripheralManager:willRestoreState: peripheral:%@ dict: %@", peripheral, dict];
 }
 
-/*!
- *  @method peripheralManagerDidStartAdvertising:error:
- *
- *  @param peripheral   The peripheral manager providing this information.
- *  @param error        If an error occurred, the cause of the failure.
- *
- *  @discussion         This method returns the result of a @link startAdvertising: @/link call. If advertisement could
- *                      not be started, the cause will be detailed in the <i>error</i> parameter.
- *
- */
 - (void)peripheralManagerDidStartAdvertising:(CBPeripheralManager *)peripheral error:(NSError *)error
 {
-    NSLog(@"peripheralManagerDidStartAdvertising:error: peripheral:%@ error:%@", peripheral, error);
+    [self logString:@"peripheralManagerDidStartAdvertising:error: peripheral:%@ error:%@", peripheral, error];
 }
 
-/*!
- *  @method peripheralManager:didAddService:error:
- *
- *  @param peripheral   The peripheral manager providing this information.
- *  @param service      The service that was added to the local database.
- *  @param error        If an error occurred, the cause of the failure.
- *
- *  @discussion         This method returns the result of an @link addService: @/link call. If the service could
- *                      not be published to the local database, the cause will be detailed in the <i>error</i> parameter.
- *
- */
 - (void)peripheralManager:(CBPeripheralManager *)peripheral didAddService:(CBService *)service error:(NSError *)error
 {
-    NSLog(@"peripheralManager:didAddService:error: peripheral:%@ service:%@ error:%@", peripheral, service, error);
+    [self logString:@"peripheralManager:didAddService:error: peripheral:%@ service:%@ error:%@", peripheral, service, error];
 }
 
-/*!
- *  @method peripheralManager:central:didSubscribeToCharacteristic:
- *
- *  @param peripheral       The peripheral manager providing this update.
- *  @param central          The central that issued the command.
- *  @param characteristic   The characteristic on which notifications or indications were enabled.
- *
- *  @discussion             This method is invoked when a central configures <i>characteristic</i> to notify or indicate.
- *                          It should be used as a cue to start sending updates as the characteristic value changes.
- *
- */
+#pragma mark - chrome.bluetoothLowEnergy.startCharacteristicNotifications
 - (void)peripheralManager:(CBPeripheralManager *)peripheral central:(CBCentral *)central didSubscribeToCharacteristic:(CBCharacteristic *)characteristic
 {
-    NSLog(@"peripheralManager:central:didSubscribeToCharacteristic: peripheral:%@ central:%@ characteristic:%@", peripheral, central, characteristic);
+    [self logString:@"peripheralManager:central:didSubscribeToCharacteristic: peripheral:%@ central:%@ characteristic:%@", peripheral, central, characteristic];
 }
 
-/*!
- *  @method peripheralManager:central:didUnsubscribeFromCharacteristic:
- *
- *  @param peripheral       The peripheral manager providing this update.
- *  @param central          The central that issued the command.
- *  @param characteristic   The characteristic on which notifications or indications were disabled.
- *
- *  @discussion             This method is invoked when a central removes notifications/indications from <i>characteristic</i>.
- *
- */
+#pragma mark - chrome.bluetoothLowEnergy.stopCharacteristicNotifications
 - (void)peripheralManager:(CBPeripheralManager *)peripheral central:(CBCentral *)central didUnsubscribeFromCharacteristic:(CBCharacteristic *)characteristic
 {
-    NSLog(@"peripheralManager:central:didUnsubscribeFromCharacteristic: peripheral:%@ central:%@ characteristic:%@", peripheral, central, characteristic);
+    [self logString:@"peripheralManager:central:didUnsubscribeFromCharacteristic: peripheral:%@ central:%@ characteristic:%@", peripheral, central, characteristic];
 }
 
 /*!
- *  @method peripheralManager:didReceiveReadRequest:
- *
- *  @param peripheral   The peripheral manager requesting this information.
- *  @param request      A <code>CBATTRequest</code> object.
- *
  *  @discussion         This method is invoked when <i>peripheral</i> receives an ATT request for a characteristic with a dynamic value.
  *                      For every invocation of this method, @link respondToRequest:withResult: @/link must be called.
- *
- *  @see                CBATTRequest
- *
  */
 - (void)peripheralManager:(CBPeripheralManager *)peripheral didReceiveReadRequest:(CBATTRequest *)request
 {
-    NSLog(@"peripheralManager:didReceiveReadRequest: peripheral:%@ request:%@", peripheral, request);
+    [self logString:@"peripheralManager:didReceiveReadRequest: peripheral:%@ request:%@", peripheral, request];
 }
 
 /*!
- *  @method peripheralManager:didReceiveWriteRequests:
- *
- *  @param peripheral   The peripheral manager requesting this information.
- *  @param requests     A list of one or more <code>CBATTRequest</code> objects.
- *
  *  @discussion         This method is invoked when <i>peripheral</i> receives an ATT request or command for one or more characteristics with a dynamic value.
  *                      For every invocation of this method, @link respondToRequest:withResult: @/link should be called exactly once. If <i>requests</i> contains
  *                      multiple requests, they must be treated as an atomic unit. If the execution of one of the requests would cause a failure, the request
  *                      and error reason should be provided to <code>respondToRequest:withResult:</code> and none of the requests should be executed.
- *
- *  @see                CBATTRequest
- *
  */
 - (void)peripheralManager:(CBPeripheralManager *)peripheral didReceiveWriteRequests:(NSArray *)requests
 {
-    NSLog(@"peripheralManager:didReceiveWriteRequests: peripheral:%@ requests:%@", peripheral, requests);
+    [self logString:@"peripheralManager:didReceiveWriteRequests: peripheral:%@ requests:%@", peripheral, requests];
 }
 
 /*!
- *  @method peripheralManagerIsReadyToUpdateSubscribers:
- *
- *  @param peripheral   The peripheral manager providing this update.
- *
  *  @discussion         This method is invoked after a failed call to @link updateValue:forCharacteristic:onSubscribedCentrals: @/link, when <i>peripheral</i> is again
  *                      ready to send characteristic value updates.
- *
  */
 - (void)peripheralManagerIsReadyToUpdateSubscribers:(CBPeripheralManager *)peripheral
 {
-    NSLog(@"peripheralManagerIsReadyToUpdateSubscribers: peripheral:%@", peripheral);
+    [self logString:@"peripheralManagerIsReadyToUpdateSubscribers: peripheral:%@", peripheral];
 }
 
 @end
