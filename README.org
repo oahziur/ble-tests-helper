@@ -10,3 +10,7 @@
            var HEART_RATE_CONTROL_POINT_UUID = '2a39';
        #+END_SRC
     3. build & run central app and this on separate devices (iPhone4S+, iPad3+, ChromeOS)
+*** Manual Test Service
+    1. get service and included service
+    2. get, update, write, and read characteristic
+    3. get, read, and write descriptor
