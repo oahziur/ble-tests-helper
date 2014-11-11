@@ -13,8 +13,6 @@
 		CE3AC3991A02B7FA00D350E1 /* InfoPlist.strings in Resources */ = {isa = PBXBuildFile; fileRef = CE3AC3971A02B7FA00D350E1 /* InfoPlist.strings */; };
 		CE3AC39B1A02B7FA00D350E1 /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = CE3AC39A1A02B7FA00D350E1 /* main.m */; };
 		CE3AC39F1A02B7FA00D350E1 /* AppDelegate.m in Sources */ = {isa = PBXBuildFile; fileRef = CE3AC39E1A02B7FA00D350E1 /* AppDelegate.m */; };
-		CE3AC3A21A02B7FA00D350E1 /* Main_iPhone.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = CE3AC3A01A02B7FA00D350E1 /* Main_iPhone.storyboard */; };
-		CE3AC3A51A02B7FA00D350E1 /* Main_iPad.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = CE3AC3A31A02B7FA00D350E1 /* Main_iPad.storyboard */; };
 		CE3AC3A81A02B7FA00D350E1 /* ViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = CE3AC3A71A02B7FA00D350E1 /* ViewController.m */; };
 		CE3AC3AA1A02B7FA00D350E1 /* Images.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = CE3AC3A91A02B7FA00D350E1 /* Images.xcassets */; };
 		CE3AC3B11A02B7FA00D350E1 /* XCTest.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = CE3AC3B01A02B7FA00D350E1 /* XCTest.framework */; };
@@ -46,8 +44,6 @@
 		CE3AC39C1A02B7FA00D350E1 /* ble-tests-helper-Prefix.pch */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "ble-tests-helper-Prefix.pch"; sourceTree = "<group>"; };
 		CE3AC39D1A02B7FA00D350E1 /* AppDelegate.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = AppDelegate.h; sourceTree = "<group>"; };
 		CE3AC39E1A02B7FA00D350E1 /* AppDelegate.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = AppDelegate.m; sourceTree = "<group>"; };
-		CE3AC3A11A02B7FA00D350E1 /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/Main_iPhone.storyboard; sourceTree = "<group>"; };
-		CE3AC3A41A02B7FA00D350E1 /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/Main_iPad.storyboard; sourceTree = "<group>"; };
 		CE3AC3A61A02B7FA00D350E1 /* ViewController.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = ViewController.h; sourceTree = "<group>"; };
 		CE3AC3A71A02B7FA00D350E1 /* ViewController.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = ViewController.m; sourceTree = "<group>"; };
 		CE3AC3A91A02B7FA00D350E1 /* Images.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Images.xcassets; sourceTree = "<group>"; };
@@ -120,8 +116,6 @@
 			children = (
 				CE3AC39D1A02B7FA00D350E1 /* AppDelegate.h */,
 				CE3AC39E1A02B7FA00D350E1 /* AppDelegate.m */,
-				CE3AC3A01A02B7FA00D350E1 /* Main_iPhone.storyboard */,
-				CE3AC3A31A02B7FA00D350E1 /* Main_iPad.storyboard */,
 				CE3AC3A61A02B7FA00D350E1 /* ViewController.h */,
 				CE3AC3A71A02B7FA00D350E1 /* ViewController.m */,
 				CE3AC3A91A02B7FA00D350E1 /* Images.xcassets */,
@@ -234,9 +228,7 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				CE3AC3A51A02B7FA00D350E1 /* Main_iPad.storyboard in Resources */,
 				CE3AC3AA1A02B7FA00D350E1 /* Images.xcassets in Resources */,
-				CE3AC3A21A02B7FA00D350E1 /* Main_iPhone.storyboard in Resources */,
 				CE3AC3991A02B7FA00D350E1 /* InfoPlist.strings in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -287,22 +279,6 @@
 				CE3AC3981A02B7FA00D350E1 /* en */,
 			);
 			name = InfoPlist.strings;
-			sourceTree = "<group>";
-		};
-		CE3AC3A01A02B7FA00D350E1 /* Main_iPhone.storyboard */ = {
-			isa = PBXVariantGroup;
-			children = (
-				CE3AC3A11A02B7FA00D350E1 /* Base */,
-			);
-			name = Main_iPhone.storyboard;
-			sourceTree = "<group>";
-		};
-		CE3AC3A31A02B7FA00D350E1 /* Main_iPad.storyboard */ = {
-			isa = PBXVariantGroup;
-			children = (
-				CE3AC3A41A02B7FA00D350E1 /* Base */,
-			);
-			name = Main_iPad.storyboard;
 			sourceTree = "<group>";
 		};
 		CE3AC3B91A02B7FA00D350E1 /* InfoPlist.strings */ = {

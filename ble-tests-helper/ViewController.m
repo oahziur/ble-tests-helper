@@ -18,6 +18,11 @@
 @property (strong, nonatomic) CBMutableCharacteristic*  heartRateSensorHeartRateCharacteristic;
 @property (strong, nonatomic) NSTimer*                  heartRateUpdateTimer;
 
+// Battery service
+@property (strong, nonatomic) CBMutableCharacteristic*  batteryLevelCharacteristic;
+@property (strong, nonatomic) NSTimer*                  batteryLevelUpdateTimer;
+
+// Chrome API Test service
 @property (strong, nonatomic) CBMutableCharacteristic*  testNotifyCharacteristic;
 @property (strong, nonatomic) NSTimer*                  testUpdateTimer;
 
@@ -57,9 +62,13 @@
 
 - (void)updateHeartRate
 {
-    short heartRate = arc4random() % 20 + 60;
-    char heartRateData[2]; heartRateData[0] = 0; heartRateData[1] = heartRate;
-    [self.peripheralManager updateValue:[NSData dataWithBytes:&heartRateData length:2] forCharacteristic:self.heartRateSensorHeartRateCharacteristic onSubscribedCentrals:nil];
+    if (self.heartRateSensorHeartRateCharacteristic) {
+        short heartRate = arc4random() % 20 + 60;
+        char heartRateData[2]; heartRateData[0] = 0; heartRateData[1] = heartRate;
+        if ([self.peripheralManager updateValue:[NSData dataWithBytes:&heartRateData length:2] forCharacteristic:self.heartRateSensorHeartRateCharacteristic onSubscribedCentrals:nil]) {
+            [self logString:@"heart rate characteristic successfully updated"];
+        }
+    }
 }
 
 - (void)addHeartRateService:(CBPeripheralManager*)peripheralManager
@@ -72,8 +81,9 @@
     CBMutableCharacteristic* heartRateSensorLocationCharacteristic = [[CBMutableCharacteristic alloc] initWithType:[CBUUID UUIDWithString:@"2A38"] properties:CBCharacteristicPropertyRead value:[NSData dataWithBytes:&sensorLocation length:1] permissions:CBAttributePermissionsReadable];
   
     // Define the heart rate reading characteristic
-    self.heartRateSensorHeartRateCharacteristic = [[CBMutableCharacteristic alloc] initWithType:[CBUUID UUIDWithString:@"2A37"] properties: CBCharacteristicPropertyNotify value:nil permissions:CBAttributePermissionsReadable];
-  
+    self.heartRateSensorHeartRateCharacteristic = [[CBMutableCharacteristic alloc] initWithType:[CBUUID UUIDWithString:@"2A37"] properties:CBCharacteristicPropertyNotify value:nil permissions:CBAttributePermissionsReadable];
+
+    [self.heartRateUpdateTimer invalidate];
     self.heartRateUpdateTimer = [NSTimer scheduledTimerWithTimeInterval:1.0f target:self selector:@selector(updateHeartRate) userInfo:nil repeats:YES];
     
     heartRateService.characteristics = @[heartRateSensorLocationCharacteristic, self.heartRateSensorHeartRateCharacteristic];
@@ -83,10 +93,39 @@
     [self.adUuids addObject:[CBUUID UUIDWithString:@"180D"]];
 }
 
+- (void)updateBatteryLevel
+{
+    if (self.batteryLevelCharacteristic) {
+        char batteryLevel = arc4random() % 100;
+        if ([self.peripheralManager updateValue:[NSData dataWithBytes:&batteryLevel length:1] forCharacteristic:self.batteryLevelCharacteristic onSubscribedCentrals:nil]) {
+            [self logString:@"battery characteristic successfully updated"];
+        }
+    }
+}
+
+- (void)addBatteryService:(CBPeripheralManager*)peripheralManager
+{
+    CBMutableService* batteryService = [[CBMutableService alloc] initWithType:[CBUUID UUIDWithString:@"180F"] primary:YES];
+    self.batteryLevelCharacteristic = [[CBMutableCharacteristic alloc] initWithType:[CBUUID UUIDWithString:@"2A19"] properties:CBCharacteristicPropertyNotify | CBCharacteristicPropertyRead value:nil permissions:CBAttributePermissionsReadable];
+    
+    [self.batteryLevelUpdateTimer invalidate];
+    self.batteryLevelUpdateTimer = [NSTimer scheduledTimerWithTimeInterval:2.0f target:self selector:@selector(updateBatteryLevel) userInfo:nil repeats:YES];
+    
+    batteryService.characteristics = @[self.batteryLevelCharacteristic];
+    
+    [peripheralManager addService:batteryService];
+    
+    [self.adUuids addObject:[CBUUID UUIDWithString:@"180F"]];
+}
+
 - (void)updateTestCharacteristic
 {
-    char val = arc4random();
-    [self.peripheralManager updateValue:[NSData dataWithBytes:&val length:1] forCharacteristic:self.testNotifyCharacteristic onSubscribedCentrals:nil];
+    if (self.testNotifyCharacteristic) {
+        char val = arc4random();
+        if ([self.peripheralManager updateValue:[NSData dataWithBytes:&val length:1] forCharacteristic:self.testNotifyCharacteristic onSubscribedCentrals:nil]) {
+            [self logString:@"test characteristic successfully updated"];
+        }
+    }
 }
 
 - (void)addTestService:(CBPeripheralManager*)peripheralManager
@@ -101,6 +140,7 @@
     
     self.testNotifyCharacteristic = [[CBMutableCharacteristic alloc] initWithType:[CBUUID UUIDWithString:@"C9D5"] properties: CBCharacteristicPropertyNotify value:nil permissions:CBAttributePermissionsReadable];
     
+    [self.testUpdateTimer invalidate];
     self.testUpdateTimer = [NSTimer scheduledTimerWithTimeInterval:3.0f target:self selector:@selector(updateTestCharacteristic) userInfo:nil repeats:YES];
    
     char testByte = 100;
@@ -121,7 +161,7 @@
     
     descriptorsCharacteristic.descriptors = @[testDescriptor];
     
-    testService.characteristics = @[testReadCharacteristic, testWriteCharacteristic, descriptorsCharacteristic]; //descriptorsCharacteristic];
+    testService.characteristics = @[self.testNotifyCharacteristic, testReadCharacteristic, testWriteCharacteristic, descriptorsCharacteristic]; //descriptorsCharacteristic];
     
     [peripheralManager addService:testService];
     [self.adUuids addObject:[CBUUID UUIDWithString:@"C9D3"]];
@@ -131,7 +171,7 @@
 {
     va_list va;
     va_start(va, format);
-    self.logTextView.text = [[self.logTextView.text stringByAppendingString:@"\n"] stringByAppendingString:[[NSString alloc] initWithFormat:format arguments:va]];
+    self.logTextView.text = [[self.logTextView.text stringByAppendingString:@"\n\n"] stringByAppendingString:[[NSString alloc] initWithFormat:format arguments:va]];
     va_end(va);
 }
 
@@ -146,6 +186,7 @@
         [peripheral stopAdvertising];
         [self.testUpdateTimer invalidate];
         [self.heartRateUpdateTimer invalidate];
+        [self.batteryLevelUpdateTimer invalidate];
         [self.adUuids removeAllObjects];
         return;
     }
@@ -154,6 +195,7 @@
     
     [self addHeartRateService:peripheral];
     [self addTestService:peripheral];
+    [self addBatteryService:peripheral];
     
     NSDictionary *data = @{CBAdvertisementDataLocalNameKey: @"BLE-tests-helper",
                            CBAdvertisementDataServiceUUIDsKey: [self.adUuids copy]};
@@ -207,13 +249,19 @@
     [self logString:@"peripheralManager:didReceiveWriteRequests: peripheral:%@ requests:%@", peripheral, requests];
 }
 
+
 /*!
+ *  @method peripheralManagerIsReadyToUpdateSubscribers:
+ *
+ *  @param peripheral   The peripheral manager providing this update.
+ *
  *  @discussion         This method is invoked after a failed call to @link updateValue:forCharacteristic:onSubscribedCentrals: @/link, when <i>peripheral</i> is again
  *                      ready to send characteristic value updates.
+ *
  */
 - (void)peripheralManagerIsReadyToUpdateSubscribers:(CBPeripheralManager *)peripheral
 {
-    [self logString:@"peripheralManagerIsReadyToUpdateSubscribers: peripheral:%@", peripheral];
+    [self logString:@"peripheralManagerIsReadyToUpdateSubscribers:%@", peripheral];
 }
 
 @end
